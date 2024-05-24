@@ -50,11 +50,11 @@ function Footer() {
             </Row>
             <Row>
                 <Col className="text-md-center mt-2">
-                    <a href="/" className="m-2"><Image src={icon_facebook} alt="Facebook" height="30px"/></a>
-                    <a href="/" className="m-2"><Image src={icon_instagram} alt="Instagram" height="30px"/></a>
-                    <a href="/" className="m-2"><Image src={icon_youtube} alt="YouTube" height="30px"/></a>
-                    <a href="/" className="m-2"><Image src={icon_tiktok} alt="TikTok" height="30px"/></a>
-                    <a href="/" className="m-2"><Image src={icon_twitter} alt="Twitter" height="30px"/></a>
+                    <a href="/" className="p-2"><Image src={icon_facebook} alt="Facebook" height="30px"/></a>
+                    <a href="/" className="p-2"><Image src={icon_instagram} alt="Instagram" height="30px"/></a>
+                    <a href="/" className="p-2"><Image src={icon_youtube} alt="YouTube" height="30px"/></a>
+                    <a href="/" className="p-2"><Image src={icon_tiktok} alt="TikTok" height="30px"/></a>
+                    <a href="/" className="p-2"><Image src={icon_twitter} alt="Twitter" height="30px"/></a>
                 </Col>
             </Row>
             <Row>

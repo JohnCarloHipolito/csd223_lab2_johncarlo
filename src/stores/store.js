@@ -2,6 +2,12 @@ import {create} from 'zustand';
 import {produce} from "immer";
 
 const useStore = create(set => ({
+    balance: 0,
+    setBalance: (amount) => set({balance: amount}),
+    userName: null,
+    setUserName: (name) => set({userName: name}),
+    account: null,
+    setAccount: (account) => set({account: account}),
     userEmail: null,
     setUserEmail: (email) => set({userEmail: email}),
     transactions: {

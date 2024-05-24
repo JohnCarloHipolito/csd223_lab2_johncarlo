@@ -16,7 +16,7 @@ function HomeCard({image, type, text}) {
     };
 
     return (
-        <Card className="mx-2" style={{ width: '25rem' }}>
+        <Card className="px-2" style={{ width: '25rem' }}>
             <Card.Img variant="top" src={image}/>
             <Card.Body>
                 <Card.Title>{type}</Card.Title>

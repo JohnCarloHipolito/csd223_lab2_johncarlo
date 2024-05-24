@@ -14,7 +14,7 @@ function Navigation() {
 
     return (
         <Navbar bg="primary" expand="lg">
-            <Container>
+            <div className="container-fluid px-4">
                 <NavLink to="/" exact="true" className="nav-link"><Image src={logo} alt="Bank Eh!" height="50px"/></NavLink>
                 <Navbar.Toggle aria-controls="basic-navbar-nav"/>
                 <Navbar.Collapse id="basic-navbar-nav">
@@ -22,12 +22,15 @@ function Navigation() {
                         <NavLink to="/" exact="true" className="nav-link">Home</NavLink>
                         {userEmail && <NavLink to="/deposit" className="nav-link">Deposit</NavLink>}
                         {userEmail && <NavLink to="/withdrawal" className="nav-link">Withdrawal</NavLink>}
-                        {userEmail && <NavLink to="/transfer" className="nav-link">E-Transfer</NavLink>}
-                        {userEmail ? <NavLink to="/login" className="nav-link" onClick={handleLogout}>Logout</NavLink> :
-                            <NavLink to="/login" className="nav-link">Login</NavLink>}
+                        {userEmail ?
+                            <NavLink to="/login" className="nav-link" onClick={handleLogout}>Logout</NavLink> :
+                            <>
+                                <NavLink to="/signup" className="nav-link">Signup</NavLink>
+                                <NavLink to="/login" className="nav-link">Login</NavLink>
+                            </>}
                     </Nav>
                 </Navbar.Collapse>
-            </Container>
+            </div>
         </Navbar>
     );
 }

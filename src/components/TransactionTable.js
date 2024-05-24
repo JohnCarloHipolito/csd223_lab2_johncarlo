@@ -6,7 +6,7 @@ function TransactionTable({account}) {
     const revTransactions = [...(transactions[account] || [])].reverse();
 
     return (
-        <Table hover className="border-top border-bottom">
+        <Table hover className="border-top border-bottom" style={{fontSize: '0.8rem'}}>
             <thead>
             <tr>
                 <th>ID</th>

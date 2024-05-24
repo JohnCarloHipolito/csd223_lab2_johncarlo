@@ -13,7 +13,7 @@ function HomePage() {
 
     return (
         <div>
-            <Carousel className="image-carousel m-4 mb-2" interval={3000} slide>
+            <Carousel className="image-carousel p-4 mb-2" interval={3000} slide>
                 {images.map((image, index) => (
                     <Carousel.Item key={index}>
                         <img className="d-block w-100" src={image.src} alt={image.alt}/>
