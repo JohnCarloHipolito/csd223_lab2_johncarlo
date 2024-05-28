@@ -1,15 +1,15 @@
 import React from 'react';
-import {Container, Image, Nav, Navbar} from 'react-bootstrap';
+import {Image, Nav, Navbar} from 'react-bootstrap';
 import {NavLink} from 'react-router-dom';
 import logo from '../images/tangerine.png';
 import useStore from "../stores/store";
 
 function Navigation() {
 
-    const {userEmail, setUserEmail} = useStore();
+    const {user, setUser} = useStore();
 
     const handleLogout = () => {
-        setUserEmail(null);
+        setUser(null);
     };
 
     return (
@@ -20,9 +20,9 @@ function Navigation() {
                 <Navbar.Collapse id="basic-navbar-nav">
                     <Nav className="ms-auto">
                         <NavLink to="/" exact="true" className="nav-link">Home</NavLink>
-                        {userEmail && <NavLink to="/deposit" className="nav-link">Deposit</NavLink>}
-                        {userEmail && <NavLink to="/withdrawal" className="nav-link">Withdrawal</NavLink>}
-                        {userEmail ?
+                        {user && <NavLink to="/deposit" className="nav-link">Deposit</NavLink>}
+                        {user && <NavLink to="/withdrawal" className="nav-link">Withdrawal</NavLink>}
+                        {user ?
                             <NavLink to="/login" className="nav-link" onClick={handleLogout}>Logout</NavLink> :
                             <>
                                 <NavLink to="/signup" className="nav-link">Signup</NavLink>

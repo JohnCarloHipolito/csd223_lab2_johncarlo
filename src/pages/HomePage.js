@@ -26,8 +26,7 @@ function HomePage() {
             </Carousel>
             <div className="d-flex gap-4 flex-column align-items-center flex-lg-row justify-content-lg-evenly m-4">
                 <HomeCard type="Deposit" text="Secure Your Future, Deposit Today!"/>
-                <HomeCard type="Withdraw" text="Empower Your Finances, Withdraw with Confidence!"/>
-                <HomeCard type="Transfer" text="Send Money To Your Love Ones!"/>
+                <HomeCard type="Withdraw" text="Withdraw with Confidence!"/>
             </div>
         </div>
     );

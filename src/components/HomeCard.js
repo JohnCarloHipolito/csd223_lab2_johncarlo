@@ -4,11 +4,11 @@ import {useNavigate} from "react-router-dom";
 import useStore from "../stores/store";
 
 function HomeCard({image, type, text}) {
-    const {userEmail} = useStore();
+    const {user} = useStore();
     const navigate = useNavigate();
 
     const handleClick = () => {
-        if (userEmail) {
+        if (user) {
             navigate(`/${type}`);
         } else {
             navigate('/login');

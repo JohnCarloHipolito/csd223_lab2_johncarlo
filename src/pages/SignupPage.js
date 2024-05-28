@@ -1,87 +1,34 @@
 import React from 'react';
 import {useForm} from 'react-hook-form';
-import {Button, Container, Form, Image} from 'react-bootstrap';
+import {Button, Form, Image} from 'react-bootstrap';
 import {useNavigate} from "react-router-dom";
 import signupImage from '../images/signup.jpg';
-import {createBody, storeHeader, storeUrl} from "../stores/jsonStore";
+import {createUser, readUser} from "../stores/repository";
 
 function SignupPage() {
     const {register, handleSubmit, reset, formState: {errors}} = useForm();
     const navigate = useNavigate();
 
-    const onSubmit = formData => {
+    const onSubmit = async formData => {
         if (errors.name || errors.email || errors.password) {
             console.log(errors);
         } else {
-            createAccount(formData);
-            createCredential(formData);
-        }
-    };
-
-    const createAccount = async (formData) => {
-        const body = createBody();
-        body.Result.Name = formData.email;
-        body.Result.About = {};
-        body.Result.About['@type'] = "Account";
-        body.Result.About.Account = generateAccount();
-
-        fetch(storeUrl, {
-            method: 'POST',
-            headers: storeHeader,
-            body: JSON.stringify(body)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ActionStatus === 'CompleteActionStatus') {
-                    console.log('Account created');
-                } else {
-                    alert('Invalid email or password. Please try again.');
+            const {success, message} = await readUser(formData.email);
+            if (success) {
+                alert('Account already exists.');
+            } else if (message === 'Account not found.') {
+                const {success, message} = await createUser(formData.email, formData.password, formData.name);
+                if (success) {
+                    alert('Account created successfully. Redirecting to login page.');
                     reset();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-
-    }
-
-    const createCredential = async (formData) => {
-        const body = createBody();
-        body.Result.Name = formData.email;
-        body.Result.About = {};
-        body.Result.About['@type'] = "Credential";
-        body.Result.About.Password = formData.password;
-
-        fetch(storeUrl, {
-            method: 'POST',
-            headers: storeHeader,
-            body: JSON.stringify(body)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ActionStatus === 'CompleteActionStatus') {
-                    console.log('Credential created');
                     navigate('/login');
                 } else {
-                    alert('Invalid email or password. Please try again.');
-                    reset();
+                    alert(message);
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    }
-
-    const generateAccount = () => {
-        const time = new Date(Date.now());
-        const yy = time.getFullYear().toString().slice(-2);
-        const mm = ('0' + (time.getMonth() + 1)).slice(-2);
-        const dd = ('0' + time.getDate()).slice(-2);
-        const hh = ('0' + time.getHours()).slice(-2);
-        const mn = ('0' + time.getMinutes()).slice(-2);
-        const ss = ('0' + time.getSeconds()).slice(-2);
-
-        return `${yy}${mm}${dd}${hh}${mn}${ss}`;
+            } else {
+                alert(message);
+            }
+        }
     };
 
     return (

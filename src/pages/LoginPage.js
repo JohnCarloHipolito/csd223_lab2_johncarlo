@@ -3,71 +3,30 @@ import {useForm} from 'react-hook-form';
 import {Button, Form, Image} from 'react-bootstrap';
 import {useNavigate} from "react-router-dom";
 import useStore from "../stores/store";
-import {storeUrl, storeHeader, readBody} from "../stores/jsonStore";
 import loginImage from '../images/login.jpg';
+import {readUser} from "../stores/repository";
 
 
 function LoginPage() {
-    const {setBalance, setAccount, setUserEmail} = useStore();
-    const {register, handleSubmit, reset, formState: {errors}} = useForm();
+    const {setUser} = useStore();
+    const {register, handleSubmit, formState: {errors}} = useForm();
     const navigate = useNavigate();
 
-    const onSubmit = formData => {
+    const onSubmit = async (formData) => {
         if (errors.email || errors.password) {
             console.log(errors);
         } else {
-            const body = readBody();
-            body.Object.FilterItem.Name = formData.email;
-            body.Object.FilterItem.About = {};
-            body.Object.FilterItem.About['@type'] = "Credential";
-
-            fetch(storeUrl, {
-                method: 'POST',
-                headers: storeHeader,
-                body: JSON.stringify(body)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.Result.NumberOfItems > 0
-                        && data.Result.ItemListElement[0].Item.About.Password === formData.password) {
-                        setUserEmail(formData.email)
-                        loadAccount(formData);
-                        navigate('/');
-                    } else {
-                        alert('Invalid email or password. Please try again.');
-                        reset();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
+            const {success, user} = await readUser(formData.email);
+            if (success && user.About.Password === formData.password) {
+                console.log('Login successful.');
+                user.Creator.Identifier = 'Admin';
+                setUser(user);
+                navigate('/');
+            } else {
+                alert('Invalid email or password. Please try again.');
+            }
         }
     };
-
-    const loadAccount = (formData) => {
-        const body = readBody();
-        body.Object.FilterItem.Name = formData.email;
-        body.Object.FilterItem.About = {};
-        body.Object.FilterItem.About['@type'] = "Account";
-
-        fetch(storeUrl, {
-            method: 'POST',
-            headers: storeHeader,
-            body: JSON.stringify(body)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.Result.NumberOfItems > 0) {
-                    setAccount(data.Result.ItemListElement[0].Item.About.Account);
-                } else {
-                    alert('Account not found. Please try again.');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-    }
-
 
     return (
         <div className="container-fluid p-4 gap-4 d-flex flex-column flex-lg-row justify-content-lg-around align-items-center align-items-lg-start">

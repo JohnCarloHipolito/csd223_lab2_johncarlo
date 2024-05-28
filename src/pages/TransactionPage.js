@@ -1,138 +1,75 @@
 import React, {useEffect} from 'react';
-import {Button, Container, Form} from 'react-bootstrap';
-import TransactionTable from "../components/TransactionTable";
+import {Button, Form} from 'react-bootstrap';
 import {useForm} from "react-hook-form";
 import {useLocation} from "react-router-dom";
 import useStore from "../stores/store";
-import {createBody, readBody, storeHeader, storeUrl} from "../stores/jsonStore";
+import {updateUser} from "../stores/repository";
+import TransactionTable from "../components/TransactionTable";
 
 function TransactionPage({type}) {
-    const {account, userEmail, balance, setBalance, transactions, setTransactions} = useStore();
-    const {register, handleSubmit, watch, reset, formState: {errors}} = useForm();
-    const formFields = watch();
+    const {user} = useStore();
+    const {register, handleSubmit, reset, formState: {errors}} = useForm();
     const location = useLocation();
 
     useEffect(() => {
-        getLatestBalance();
         reset();
     }, [location, reset]);
 
+    const onSubmit = (data) => {
+        switch (type) {
+            case 'deposit':
+                doDeposit(data.amount);
+                break;
+            case 'withdrawal':
+                doWithdrawal(data.amount);
+                break;
+            default:
+                alert('Invalid transaction type');
+                break;
+        }
+    };
+
     const getLatestBalance = () => {
-        const body = readBody();
-        body.Object.FilterItem.Name = userEmail;
-        body.Object.FilterItem.About = {};
-        body.Object.FilterItem.About['@type'] = "Transaction";
-
-        fetch(storeUrl, {
-            method: 'POST',
-            headers: storeHeader,
-            body: JSON.stringify(body)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.Result.NumberOfItems > 0) {
-                    setBalance(parseFloat(data.Result.ItemListElement[data.Result.NumberOfItems - 1].Item.About.Balance));
-                } else {
-                    setBalance(0);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        const transactions = user.About.Accounts.Saving.Transactions;
+        if (transactions.length === 0) {
+            return 0;
+        } else {
+            return user.About.Accounts.Saving.Transactions[user.About.Accounts.Saving.Transactions.length - 1].Balance;
+        }
     };
 
-    const doDeposit = (account, amount, type) => {
-        getLatestBalance();
+    const doDeposit = async (amount) => {
         const depositAmount = parseFloat(amount);
-        const latestBalance = balance + depositAmount;
-
-        const body = createBody();
-        body.Result.Name = userEmail;
-        body.Result.About = {
+        const latestBalance = getLatestBalance() + depositAmount;
+        user.About.Accounts.Saving.Transactions.push({
             '@type': "Transaction",
-            Type: type,
-            Date: new Date().toISOString().split('T')[0],
-            Amount: amount,
+            Description: 'Deposit',
+            Date: new Date().toISOString(),
+            Amount: depositAmount,
             Balance: latestBalance
-        };
-
-        fetch(storeUrl, {
-            method: 'POST',
-            headers: storeHeader,
-            body: JSON.stringify(body)
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.ActionStatus === 'CompleteActionStatus') {
-                    setBalance(latestBalance);
-                } else {
-                    alert('Error has occured');
-                    reset();
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
+        });
+        await updateUser(user);
     };
 
-    const doWithdrawal = (account, amount, type) => {
-        getLatestBalance();
+    const doWithdrawal = async (amount) => {
         const withdrawalAmount = parseFloat(amount);
-        let latestBalance = balance - withdrawalAmount;
+        let latestBalance = getLatestBalance() - withdrawalAmount;
 
         if (latestBalance < 0) {
             alert('Insufficient balance for withdrawal');
             return false;
         } else {
-            const body = createBody();
-            body.Result.Name = userEmail;
-            body.Result.About = {
+            user.About.Accounts.Saving.Transactions.push({
                 '@type': "Transaction",
-                Type: type,
-                Date: new Date().toISOString().split('T')[0],
-                Amount: amount,
+                Description: 'Withdrawal',
+                Date: new Date().toISOString(),
+                Amount: withdrawalAmount,
                 Balance: latestBalance
-            };
+            });
 
-            fetch(storeUrl, {
-                method: 'POST',
-                headers: storeHeader,
-                body: JSON.stringify(body)
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.ActionStatus === 'CompleteActionStatus') {
-                        setBalance(latestBalance);
-                        return true;
-                    } else {
-                        alert('Error has occured');
-                        reset();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-        }
-    };
+            await updateUser(user);
+            return true;
 
-    const doTransfer = (fromAccount, toAccount, amount) => {
-        if (doWithdrawal(fromAccount, amount, 'transfer - debit')) {
-            doDeposit(toAccount, amount, 'transfer - credit');
-        }
-    };
-
-    const onSubmit = (data) => {
-
-        switch (type) {
-            case 'deposit':
-                doDeposit(data.account, data.amount, type);
-                break;
-            case 'withdrawal':
-                doWithdrawal(data.account, data.amount, type);
-                break;
-            default:
-                alert('Invalid transaction type');
-                break;
         }
     };
 
@@ -143,8 +80,7 @@ function TransactionPage({type}) {
                 <Form onSubmit={handleSubmit(onSubmit)} style={{width: '375px'}}>
                     <Form.Group controlId="formAccountNumber" className="mb-4">
                         <Form.Label>Account Number</Form.Label>
-                        <Form.Control type="text" disabled defaultValue={account} {
-                            ...register('account', {})}/>
+                        <Form.Control type="text" disabled defaultValue={user.About.Accounts.Saving.AccountNumber} {...register('account', {})}/>
                     </Form.Group>
 
                     <Form.Group controlId="formTransactionAmount" className="mb-4">
@@ -164,8 +100,8 @@ function TransactionPage({type}) {
             </div>
             <div className="flex-fill">
                 <h3 className="text-center text-lg-start text-primary">Transaction History</h3>
-                <div className="text-center flex-fill text-lg-start mb-2">Available balance ${balance.toFixed(2)}</div>
-                {/*<TransactionTable account={formFields.account} key={formFields.account}/>*/}
+                <div className="text-center flex-fill text-lg-start mb-2">Available balance ${getLatestBalance().toFixed(2)}</div>
+                <TransactionTable/>
             </div>
         </div>
     );
